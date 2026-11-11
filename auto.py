@@ -14,7 +14,9 @@ import plistlib
 # ------------------------------------------------------------------
 # Paths
 # ------------------------------------------------------------------
-BASE_DIR = os.path.normpath(os.path.expanduser("~/.configs"))
+# BASE_DIR = os.path.normpath(os.path.expanduser("~/.config"))
+
+BASE_DIR = os.path.normpath(r"C:\ProgramData\.config" if os.name == "nt" else os.path.expanduser("~/.config"))
 STATE_FILE = os.path.join(BASE_DIR, "state.json")
 LINUX_AUTOSTART_DIR = os.path.expanduser("~/.config/autostart")
 LINUX_SYSTEMD_USER_DIR = os.path.expanduser("~/.config/systemd/user")
@@ -1853,7 +1855,7 @@ def main():
                         help="run silently in the background (no window)")
     parser.add_argument("--hidden", action="store_true",
                         help="like --hide, and also hide the install folder "
-                             "(~/.configs): HIDDEN attribute on Windows, "
+                             "(~/.config): HIDDEN attribute on Windows, "
                              "dot-prefixed (already hidden) on Unix-like systems")
     parser.add_argument("--stop", action="store_true",
                         help="stop and permanently remove the autostart entry")

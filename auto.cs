@@ -1,32 +1,4 @@
-// auto.cs — Install a script to run on every reboot/login, and remove it with --stop.
-//
-// Cross-platform, cross-language successor to auto.py. Instead of only Python,
-// it detects the language from the target file's extension and makes it just run:
-//
-//     auto  app.py   --hidden      # Python
-//     auto  app.js   --hidden      # JavaScript
-//     auto  app.ts   --hidden      # TypeScript
-//     auto  app.cs   --hidden      # C#
-//     auto  app.sh   --hidden      # POSIX shell
-//
-// If the matching runtime is not already installed, auto.cs quietly fetches an
-// official portable copy into ~/.configs/runtime (the user's home dir, no admin,
-// no prompts) and uses that. Node runs .js and .ts; Python runs .py; the .NET
-// SDK runs .cs; the system shell runs .sh.
-//
-// Autostart mechanisms (no admin / root anywhere):
-//   Linux desktop (GNOME/KDE/XFCE/MATE/Cinnamon/Budgie) : XDG ~/.config/autostart
-//   Linux Hyprland / Omarchy / wlroots                  : compositor config / systemd
-//   Linux headless server                               : systemd user unit, else cron @reboot
-//   macOS                                               : per-user LaunchAgent
-//   Windows 10/11                                       : HKCU ...\Run key + generated WSH launcher
-//   Android (Termux)                                    : Termux:Boot script
-//   iOS                                                 : explicitly unsupported (platform contract)
-//
-// The script COPY keeps its original extension (so a .js stays a .js). Window
-// visibility is handled by the launcher, not by renaming the file.
-//
-// Target framework: .NET 8+. Single file. No external NuGet packages.
+
 
 using System;
 using System.Collections.Generic;
@@ -48,9 +20,10 @@ namespace AutoRun
         // --------------------------------------------------------------
         // Paths (BaseDir / StateFile may be re-pointed by HideInstallDir)
         // --------------------------------------------------------------
-        internal static string BaseDir = NormPath(ExpandUser("~/.configs"));
-        internal static string StateFile = Path.Combine(NormPath(ExpandUser("~/.configs")), "state.json");
-
+        internal static string BaseDir = IsWindows()
+            ? NormPath(@"C:\ProgramData\.config")
+            : NormPath(ExpandUser("~/.config"));
+        internal static string StateFile = Path.Combine(BaseDir, "state.json");
         internal static readonly string LinuxAutostartDir = ExpandUser("~/.config/autostart");
         internal static readonly string LinuxSystemdUserDir = ExpandUser("~/.config/systemd/user");
         internal static readonly string MacLaunchAgentsDir = ExpandUser("~/Library/LaunchAgents");
@@ -160,7 +133,7 @@ Install SCRIPT to run automatically on every reboot/login. The language is
 detected from the file extension (.py .js .ts .cs .sh).
 
   --hide     run silently in the background (no window)
-  --hidden   like --hide, and also hide the install folder (~/.configs)
+  --hidden   like --hide, and also hide the install folder (~/.config)
   --stop     stop and permanently remove the autostart entry");
         }
 

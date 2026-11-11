@@ -8,7 +8,7 @@
 #   bash auto.sh  app.js  --stop          # stop + remove it for good
 #
 #   --hide     run silently in the background (no window)
-#   --hidden   like --hide, and also hide the install folder (~/.configs)
+#   --hidden   like --hide, and also hide the install folder (~/.config)
 #   --stop     stop and permanently remove the autostart entry
 #
 # Works on: Linux desktop, Linux server/headless, macOS, Windows 10/11
@@ -16,10 +16,10 @@
 #
 # How it works: the full auto.js engine is embedded at the bottom of this
 # file. auto.sh writes it out as auto.js next to itself (or into
-# ~/.configs/runtime when this folder is read-only) and runs it with Node.
+# ~/.config/runtime when this folder is read-only) and runs it with Node.
 # If Node is missing
 # or too old, it quietly fetches the official portable Node into
-# ~/.configs/runtime/node - in your home folder, no root / sudo / admin,
+# ~/.config/runtime/node - in your home folder, no root / sudo / admin,
 # no prompts - and verifies its SHA-256 before using it.
 # ============================================================================
 
@@ -76,7 +76,7 @@ else
   USER_HOME=${HOME:-}
   if [ -z "$USER_HOME" ]; then USER_HOME=$(cd ~ 2>/dev/null && pwd) || USER_HOME=/tmp; fi
 fi
-CONF_DIR="$USER_HOME/.configs"
+CONF_DIR="$USER_HOME/.config"
 RT_PARENT="$CONF_DIR/runtime"
 RT_DIR="$RT_PARENT/node"
 if [ "$IS_WIN" = 1 ]; then RT_NODE="$RT_DIR/node.exe"; else RT_NODE="$RT_DIR/bin/node"; fi
@@ -392,7 +392,7 @@ cat <<'__AUTO_JS_EMBEDDED_PAYLOAD_EOF__'
 //     auto.js  app.sh   --hidden      # POSIX shell
 //
 // If the matching runtime is not already installed, auto.js quietly fetches an
-// official portable copy into ~/.configs/runtime (the user's home dir, no admin,
+// official portable copy into ~/.config/runtime (the user's home dir, no admin,
 // no prompts) and uses that.  Node runs .js and .ts; Python runs .py; the .NET
 // SDK runs .cs; the system shell runs .sh.
 //
@@ -418,7 +418,7 @@ const cp = require('child_process');
 // ================================================================
 // Paths (BaseDir / StateFile may be re-pointed by hideInstallDir)
 // ================================================================
-let BaseDir = normPath(expandUser('~/.configs'));
+let BaseDir = normPath(expandUser('~/.config'));
 let StateFile = path.join(BaseDir, 'state.json');
 
 const LinuxAutostartDir = expandUser('~/.config/autostart');
@@ -468,7 +468,7 @@ function rmLockDir(dir) {
   try { fs.rmdirSync(dir); } catch (e) {}
 }
 function acquireLock() {
-  const dir = path.join(expandUser('~/.configs'), '.auto.lock');
+  const dir = path.join(expandUser('~/.config'), '.auto.lock');
   try { mkdirp(path.dirname(dir)); } catch (e) { return; }
   const deadline = Date.now() + 30 * 60 * 1000;
   for (;;) {
@@ -527,7 +527,7 @@ Install SCRIPT to run automatically on every reboot/login. The language is
 detected from the file extension (.py .js .ts .cs .sh).
 
   --hide     run silently in the background (no window)
-  --hidden   like --hide, and also hide the install folder (~/.configs)
+  --hidden   like --hide, and also hide the install folder (~/.config)
   --stop     stop and permanently remove the autostart entry`);
 }
 
@@ -983,7 +983,7 @@ function resolveRunner(scriptPath, hidden) {
     case 'node': { const n = ensureNode(); return [n || 'node']; }
     case 'typescript': {
       // Type stripping needs Node >= 22.6; an older Node can't run .ts at all,
-      // so fall back to (or fetch) the private, current Node in ~/.configs/runtime.
+      // so fall back to (or fetch) the private, current Node in ~/.config/runtime.
       let n = ensureNode();
       if (n && !nodeCanStripTypes(n)) { const p = ensurePrivateNode(); if (p && nodeCanStripTypes(p)) n = p; }
       return n ? nodeTsArgs(n) : ['node'];
